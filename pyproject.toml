@@ -1,0 +1,16 @@
+[project]
+name = "ask-the-docs"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.115.12",
+    "fastembed>=0.6.0",
+    "firecrawl-py>=1.15.0",
+    "loguru>=0.7.3",
+    "pydantic>=2.11.1",
+    "python-dotenv>=1.1.0",
+    "qdrant-client>=1.13.3",
+    "websockets==10.1",
+]
