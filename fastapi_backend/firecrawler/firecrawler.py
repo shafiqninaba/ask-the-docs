@@ -2,6 +2,7 @@ from firecrawl import FirecrawlApp
 from loguru import logger
 from uuid import uuid4
 from typing import Optional
+import asyncio
 
 class FirecrawlService:
     def __init__(self, firecrawl_api_url: str, vector_store):
@@ -10,18 +11,17 @@ class FirecrawlService:
         self.vector_store = vector_store
         self.root_url = None
 
-    async def on_document(self, detail):
-        """Handle document events by uploading to vector store."""
+    async def _process_document(self, detail):
+        """Async handler for document processing."""
         try:
-            document = detail['data'].get('text', '')
+            document = detail['data'].get('markdown', '')
             metadata = {
                 **detail['data'].get('metadata', {}),
                 "root_url": self.root_url,
-                "scraped_at": detail['data'].get('timestamp')
             }
             
             await self.vector_store.add_documents(
-                collection_name=self.root_url,
+                collection_name=''.join([char for char in self.root_url if char.isalnum()]),
                 document=document,
                 metadata=metadata,
                 id=str(uuid4())
@@ -30,6 +30,10 @@ class FirecrawlService:
         except Exception as e:
             logger.error(f"Failed to upload document: {e}")
 
+    def on_document(self, detail):
+        """Synchronous wrapper for document events that schedules async processing."""
+        asyncio.create_task(self._process_document(detail))
+        
     def on_error(self, detail):
         logger.error(detail["error"])
 
@@ -38,12 +42,11 @@ class FirecrawlService:
 
     async def crawl_url(self, url: str, limit: Optional[int] = 10):
         """Start crawling the given URL."""
-        self.root_url = str(url)
-        
+        self.root_url = str(url).rstrip("/")
         try:
             watcher = self.app.crawl_url_and_watch(str(url), {"limit": limit})
             
-            watcher.add_event_listener("document",self.on_document)
+            watcher.add_event_listener("document", self.on_document)
             watcher.add_event_listener("error", self.on_error)
             watcher.add_event_listener("done", self.on_done)
 

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, HTTPException
 from fastapi_backend.models.firecrawl import CrawlRequest
 from loguru import logger
+from uuid import uuid4
 
 router = APIRouter(
     prefix="/firecrawl",
