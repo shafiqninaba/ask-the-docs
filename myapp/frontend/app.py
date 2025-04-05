@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 
@@ -18,19 +19,34 @@ WEBSOCKET_URL = FASTAPI_BACKEND.replace("http", "ws").replace("https", "wss") + 
 # Initialize crawling state if not exists
 if "is_crawling" not in st.session_state:
     st.session_state["is_crawling"] = False
+if "start_time" not in st.session_state:
+    st.session_state["start_time"] = None
 
 st.title("🔥🌐 Firecrawler")
 url = st.text_input("Enter a URL to crawl", "https://firecrawl.dev")
 limit = st.slider("Maximum pages to crawl", min_value=10, max_value=1000, value=500, step=10)
 
-# Disable button while crawling is active
-if st.button("Start Crawl", disabled=st.session_state["is_crawling"]) and url:
-    st.session_state["messages"] = []
-    st.session_state["stats"] = {"pages": 0, "errors": 0}
-    st.session_state["crawled_urls"] = []  # Add list to store crawled URLs
-    st.session_state["is_crawling"] = True
+# Button container that will be conditionally shown/hidden
+button_container = st.empty()
 
-    # Create empty placeholders for dynamic content OUTSIDE the loop
+# Only show the button if we're not currently crawling
+if not st.session_state["is_crawling"]:
+    if button_container.button("Start Crawl", key="start_crawl_button") and url:
+        st.session_state["messages"] = []
+        st.session_state["stats"] = {"pages": 0, "errors": 0}
+        st.session_state["crawled_urls"] = []  # Add list to store crawled URLs
+        st.session_state["is_crawling"] = True
+        st.session_state["start_time"] = time.time()
+        
+        # Clear the button once crawling starts
+        button_container.empty()
+
+# Create spinner container outside the crawler logic
+spinner_container = st.empty()
+
+# If crawling is active, show the time elapsed spinner
+if st.session_state["is_crawling"]:
+    # Create empty placeholders for dynamic content
     stats_placeholder = st.empty()
     urls_placeholder = st.empty()
     messages_placeholder = st.empty()
@@ -38,11 +54,11 @@ if st.button("Start Crawl", disabled=st.session_state["is_crawling"]) and url:
     async def crawl():
         try:
             async with websockets.connect(WEBSOCKET_URL) as websocket:
-                await websocket.send(json.dumps({"url": url, "limit": limit}))
+                await websocket.send(json.dumps({"url": url, "limit": limit-1}))
                 
                 try:
-                    with st.spinner("Crawling in progress", show_time=True):
-                        while True:
+                    with st.spinner("Crawling in progress...", show_time=True):
+                      while True:                            
                             message = await websocket.recv()
                             data = json.loads(message)
                             timestamp = datetime.now().strftime("%H:%M:%S")
@@ -72,6 +88,9 @@ if st.button("Start Crawl", disabled=st.session_state["is_crawling"]) and url:
                                     "time": timestamp
                                 })
                                 st.session_state["is_crawling"] = False
+                                st.session_state["start_time"] = None
+                                # Clear the spinner
+                                spinner_container.empty()
                                 break
 
                             # Update stats display
@@ -87,7 +106,6 @@ if st.button("Start Crawl", disabled=st.session_state["is_crawling"]) and url:
                                 urls_to_show = st.session_state["crawled_urls"]
                                 for url_item in urls_to_show:
                                     st.text(f"{url_item['time']} - {url_item['url']}")
-                        
                                     
                 except websockets.exceptions.ConnectionClosedOK:
                     # Connection closed normally, make sure we show the final status
@@ -100,9 +118,13 @@ if st.button("Start Crawl", disabled=st.session_state["is_crawling"]) and url:
                         })
                         st.success("Crawl completed!", icon="✅")
                         st.session_state["is_crawling"] = False  # Mark crawling as complete
+                        st.session_state["start_time"] = None
+                        button_container.button("Start Crawl", key="restart_crawl_button")  # Added unique key
+
                         
         except Exception as e:
             st.error(f"Error: {str(e)}")
             st.session_state["is_crawling"] = False  # Reset on error
+            st.session_state["start_time"] = None
 
     asyncio.run(crawl())
