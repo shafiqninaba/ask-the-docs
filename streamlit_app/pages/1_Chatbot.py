@@ -3,14 +3,17 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage
 from dotenv import load_dotenv
 import requests
+from urllib.parse import urljoin
+import os
 
 load_dotenv()
 
+FASTAPI_BACKEND = os.getenv("FASTAPI_BACKEND")
 
 # Function to fetch collections from the API
 def fetch_collections():
     try:
-        response = requests.post("http://localhost:8000/vector-store/collections")
+        response = requests.post(urljoin(FASTAPI_BACKEND,"/vector-store/collections"))
         data = response.json()
         collections = [collection["name"] for collection in data.get("collections", [])]
         return collections

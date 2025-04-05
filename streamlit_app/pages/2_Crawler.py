@@ -6,6 +6,7 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 import time
+from urllib.parse import urljoin
 
 load_dotenv()
 
@@ -14,7 +15,7 @@ st.set_page_config(page_title="Firecrawl App", layout="centered")
 FASTAPI_BACKEND = os.getenv("FASTAPI_BACKEND")
 
 # replace http or https with ws or wss
-WEBSOCKET_URL = FASTAPI_BACKEND.replace("http", "ws").replace("https", "wss") + "/ws/crawl"
+WEBSOCKET_URL = urljoin(FASTAPI_BACKEND.replace("http", "ws").replace("https", "wss"),"/ws/crawl")
 
 # Initialize crawling state if not exists
 if "is_crawling" not in st.session_state:
