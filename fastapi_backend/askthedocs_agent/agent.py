@@ -7,25 +7,31 @@ from fastapi_backend.askthedocs_agent.utils.tools import tools
 from langgraph.checkpoint.memory import MemorySaver
 from uuid import uuid4
 
+# Initialize memory saver
 memory = MemorySaver()
 
 load_dotenv()
 
-graph_builder = StateGraph(State)
 
-graph_builder.add_node("chatbot", chatbot)
+def create_graph():
+    graph_builder = StateGraph(State)
+    graph_builder.add_node("chatbot", chatbot)
 
-tool_node = ToolNode(tools=tools)
-graph_builder.add_node("tools", tool_node)
+    tool_node = ToolNode(tools=tools)
+    graph_builder.add_node("tools", tool_node)
 
-graph_builder.add_conditional_edges(
-    "chatbot",
-    tools_condition,
-)
-# Any time a tool is called, we return to the chatbot to decide the next step
-graph_builder.add_edge("tools", "chatbot")
-graph_builder.set_entry_point("chatbot")
-graph = graph_builder.compile(checkpointer=memory)
+    graph_builder.add_conditional_edges(
+        "chatbot",
+        tools_condition,
+    )
+    # Any time a tool is called, we return to the chatbot to decide the next step
+    graph_builder.add_edge("tools", "chatbot")
+    graph_builder.set_entry_point("chatbot")
+    return graph_builder.compile(checkpointer=memory)
+
+
+# Create the graph instance for standalone usage outside of FastAPI
+graph = create_graph()
 
 
 def stream_graph_updates(user_input: str):

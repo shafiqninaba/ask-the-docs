@@ -7,7 +7,7 @@ class VectorStore:
     def __init__(self, client: QdrantClient):
         self.client = client
 
-    async def add_documents(
+    def add_documents(
         self, collection_name: str, document: str, metadata: dict, id: str
     ):
         """Add documents to the vector store."""

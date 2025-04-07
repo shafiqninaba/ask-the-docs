@@ -65,62 +65,76 @@ if st.session_state["is_crawling"]:
                     with st.spinner("Crawling in progress...", show_time=True):
                         while True:
                             message = await websocket.recv()
-                            data = json.loads(message)
-                            timestamp = datetime.now().strftime("%H:%M:%S")
 
-                            if data["event"] == "document":
-                                st.session_state["stats"]["pages"] += 1
-                                st.session_state["messages"].append(
-                                    {
-                                        "type": "document",
-                                        "content": f"Crawled: {data['url']}",
-                                        "time": timestamp,
-                                    }
-                                )
-                                st.session_state["crawled_urls"].append(
-                                    {"url": data["url"], "time": timestamp}
-                                )
-                            elif data["event"] == "error":
-                                st.session_state["stats"]["errors"] += 1
-                                st.session_state["messages"].append(
-                                    {
-                                        "type": "error",
-                                        "content": f"Error: {data['error']}",
-                                        "time": timestamp,
-                                    }
-                                )
-                            elif data["event"] == "done":
-                                st.session_state["messages"].append(
-                                    {
-                                        "type": "done",
-                                        "content": f"Done: {data['status']}",
-                                        "time": timestamp,
-                                    }
-                                )
-                                st.session_state["is_crawling"] = False
-                                st.session_state["start_time"] = None
-                                # Clear the spinner
-                                spinner_container.empty()
-                                break
+                            # Skip empty messages (pings)
+                            if not message:
+                                continue
 
-                            # Update stats display
-                            with stats_placeholder.container():
-                                col1, col2 = st.columns(2)
-                                with col1:
-                                    st.metric(
-                                        "Pages Crawled",
-                                        st.session_state["stats"]["pages"],
+                            try:
+                                data = json.loads(message)
+                                timestamp = datetime.now().strftime("%H:%M:%S")
+
+                                if data["event"] == "document":
+                                    st.session_state["stats"]["pages"] += 1
+                                    st.session_state["messages"].append(
+                                        {
+                                            "type": "document",
+                                            "content": f"Crawled: {data['url']}",
+                                            "time": timestamp,
+                                        }
                                     )
-                                with col2:
-                                    st.metric(
-                                        "Errors", st.session_state["stats"]["errors"]
+                                    st.session_state["crawled_urls"].append(
+                                        {"url": data["url"], "time": timestamp}
                                     )
+                                elif data["event"] == "error":
+                                    st.session_state["stats"]["errors"] += 1
+                                    st.session_state["messages"].append(
+                                        {
+                                            "type": "error",
+                                            "content": f"Error: {data['error']}",
+                                            "time": timestamp,
+                                        }
+                                    )
+                                elif data["event"] == "done":
+                                    st.session_state["messages"].append(
+                                        {
+                                            "type": "done",
+                                            "content": f"Done: {data['status']}",
+                                            "time": timestamp,
+                                        }
+                                    )
+                                    st.session_state["is_crawling"] = False
+                                    st.session_state["start_time"] = None
+                                    # Clear the spinner
+                                    spinner_container.empty()
+                                    break
 
-                            # Update URLs display
-                            with urls_placeholder.container(height=200):
-                                urls_to_show = st.session_state["crawled_urls"][::-1]
-                                for url_item in urls_to_show:
-                                    st.text(f"{url_item['time']} - {url_item['url']}")
+                                # Update stats display
+                                with stats_placeholder.container():
+                                    col1, col2 = st.columns(2)
+                                    with col1:
+                                        st.metric(
+                                            "Pages Crawled",
+                                            st.session_state["stats"]["pages"],
+                                        )
+                                    with col2:
+                                        st.metric(
+                                            "Errors",
+                                            st.session_state["stats"]["errors"],
+                                        )
+
+                                # Update URLs display
+                                with urls_placeholder.container(height=200):
+                                    urls_to_show = st.session_state["crawled_urls"][
+                                        ::-1
+                                    ]
+                                    for url_item in urls_to_show:
+                                        st.text(
+                                            f"{url_item['time']} - {url_item['url']}"
+                                        )
+                            except json.JSONDecodeError:
+                                # Log or ignore non-JSON messages (like pings)
+                                continue
 
                 except websockets.exceptions.ConnectionClosedOK:
                     # Connection closed normally, make sure we show the final status

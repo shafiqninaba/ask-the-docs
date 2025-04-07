@@ -1,57 +1,72 @@
-from fastapi import APIRouter
-from dotenv import load_dotenv
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
-from fastapi_backend.askthedocs_agent.agent import graph
-from uuid import uuid4
-import asyncio
-import json
+from fastapi import APIRouter, WebSocket
+from langchain_core.messages import SystemMessage, HumanMessage
+from loguru import logger
 
-load_dotenv()
-
-router = APIRouter(prefix="/chat", tags=["firecrawl"])
+router = APIRouter(prefix="/agent", tags=["agent"])
 
 
-class QueryInput(BaseModel):
-    user_query: str
-    collection_name: str
-    thread_id: str = None
+@router.websocket("/ws/{thread_id}")
+async def agent_websocket(websocket: WebSocket, thread_id: str):
+    await websocket.accept()
 
+    try:
+        data = await websocket.receive_json()
+        message = data.get("message", "")
+        collection_name = data.get("collection_name", "")
 
-@router.post("/chat/stream")
-async def stream_chat(query_input: QueryInput):
-    async def event_generator():
-        try:
-            thread_id = query_input.thread_id if query_input.thread_id else str(uuid4())
-            config = {"configurable": {"thread_id": thread_id}}
+        # Send acknowledgment
+        await websocket.send_json(
+            {"type": "info", "content": "Processing your request..."}
+        )
 
-            # Add collection context to the user query
-            enhanced_query = f"Using the '{query_input.collection_name}' collection, {query_input.user_query}"
+        # Run the agent and send only final outputs
+        config = {"collection_name": collection_name, "thread_id": thread_id}
 
-            # Stream responses from LangGraph
-            events = graph.stream(
-                {"messages": [{"role": "user", "content": enhanced_query}]},
-                config,
-                stream_mode="values",
-            )
+        # Create system message with collection context
+        system_message = SystemMessage(
+            content=f"You are an assistant helping with documentation. Use the '{collection_name}' collection to query relevant information from the vector store ONLY IF you deem that it is required. If you query from the vector store, please provide the source of the information that can be found in the metadata."
+        )
 
-            # Send thread_id as first message
-            yield f"data: {json.dumps({'type': 'thread_id', 'thread_id': thread_id})}\n\n"
+        # Add system message to config
+        config["system_message"] = system_message
 
-            # Stream each token/chunk as it becomes available
-            for event in events:
-                if "messages" in event and len(event["messages"]) > 0:
-                    message = event["messages"][-1].content
-                    yield f"data: {json.dumps({'type': 'content', 'content': message})}\n\n"
+        # Convert the user message to a proper HumanMessage object
 
-                    # Small delay to avoid overwhelming the client
-                    await asyncio.sleep(0.01)
+        user_message = HumanMessage(content=message)
 
-            # Signal completion
-            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        # Keep track of the final response
+        final_response = ""
 
-        except Exception as e:
-            error_msg = f"Error: {str(e)}"
-            yield f"data: {json.dumps({'type': 'error', 'error': error_msg})}\n\n"
+        # Initialize messages for this run
+        messages = [system_message, user_message]
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+        # Start the stream with proper initial messages instead of just the user message
+        for event in websocket.app.state.graph.stream(
+            {"messages": messages}, config=config, stream_mode="values"
+        ):
+            if "messages" in event and len(event["messages"]) > 0:
+                # Get the newest message
+                newest_message = event["messages"][-1]
+
+                if newest_message.type == "ai" and hasattr(newest_message, "content"):
+                    # For token-by-token streaming
+                    token = newest_message.content
+                    if isinstance(token, str):
+                        final_response = token  # Replace with latest complete response
+                        await websocket.send_json({"type": "delta", "content": token})
+            elif event.get("type") == "on_chat_model_stream":
+                # This is a token-by-token update
+                token = event.get("data", "")
+                final_response += token  # Accumulate the response
+                await websocket.send_json({"type": "delta", "content": token})
+
+        # Always send the final accumulated response without relying on memory
+        await websocket.send_json({"type": "final", "content": final_response})
+
+    except Exception as e:
+        logger.error(f"Error in agent websocket: {e}")
+        await websocket.send_json(
+            {"type": "error", "content": f"Error processing request: {str(e)}"}
+        )
+
+    await websocket.close()

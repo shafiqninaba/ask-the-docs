@@ -19,7 +19,24 @@ async def websocket_endpoint(websocket: WebSocket):
         await websocket.close()
         return
 
+    # Add ping/pong keepalive handler
+    ping_task = None
+
+    async def send_periodic_pings():
+        try:
+            while True:
+                await asyncio.sleep(15)  # Send ping every 15 seconds
+                await websocket.send_bytes(b"")  # Simple ping as empty bytes
+                logger.debug("Ping sent to client")
+        except asyncio.CancelledError:
+            logger.debug("Ping task cancelled")
+        except Exception as e:
+            logger.error(f"Error in ping task: {e}")
+
     try:
+        # Start ping keepalive task
+        ping_task = asyncio.create_task(send_periodic_pings())
+
         data = await websocket.receive_json()
         url = data.get("url")
         limit = data.get("limit", 500)
@@ -33,10 +50,17 @@ async def websocket_endpoint(websocket: WebSocket):
                         "url": detail["data"]["metadata"].get("url", "unknown"),
                     }
                 )
-                # Also process the document in the service
-                firecrawl_app.on_document(detail)
+                # Process document in a separate task to avoid blocking
+                asyncio.create_task(process_document_async(detail))
             except Exception as e:
                 logger.error(f"Error in document handler: {e}")
+
+        async def process_document_async(detail):
+            # Process document asynchronously to avoid blocking
+            try:
+                firecrawl_app.on_document(detail)
+            except Exception as e:
+                logger.error(f"Error processing document: {e}")
 
         async def on_error(detail):
             try:
@@ -88,4 +112,10 @@ async def websocket_endpoint(websocket: WebSocket):
 
     finally:
         # Ensure proper cleanup
+        if ping_task:
+            ping_task.cancel()
+            try:
+                await ping_task
+            except asyncio.CancelledError:
+                pass
         await websocket.close()

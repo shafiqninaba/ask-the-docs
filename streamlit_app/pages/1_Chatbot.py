@@ -1,19 +1,26 @@
 import streamlit as st
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, AIMessage
 from dotenv import load_dotenv
 import requests
 from urllib.parse import urljoin
 import os
+import uuid
+import asyncio
+import websockets
+import json
+from streamlit.runtime.scriptrunner import add_script_run_ctx
+import threading
 
 load_dotenv()
 
 FASTAPI_BACKEND = os.getenv("FASTAPI_BACKEND")
+# Convert HTTP URL to WebSocket URL
+WS_BACKEND = FASTAPI_BACKEND.replace("http://", "ws://").replace("https://", "wss://")
+
 
 # Function to fetch collections from the API
 def fetch_collections():
     try:
-        response = requests.post(urljoin(FASTAPI_BACKEND,"/vector-store/collections"))
+        response = requests.post(urljoin(FASTAPI_BACKEND, "/vector-store/collections"))
         data = response.json()
         collections = [collection["name"] for collection in data.get("collections", [])]
         return collections
@@ -22,7 +29,7 @@ def fetch_collections():
         return []
 
 
-# Show title and description.
+# Show title and description
 st.title("💬 Chatbot")
 
 # Fetch collections and create dropdown
@@ -44,45 +51,94 @@ if collections:
 else:
     st.warning("No collections available. Please check your API connection.")
 
-# Create an OpenAI client.
-client = ChatOpenAI(model="gpt-4o-mini", streaming=True)
-
-# Create a session state variable to store the chat messages.
+# Initialize session states
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display the existing chat messages
+if "thread_id" not in st.session_state:
+    st.session_state.thread_id = str(uuid.uuid4())
+
+
+async def communicate_via_websocket(prompt, message_placeholder):
+    accumulated_response = ""
+    websocket_url = f"{WS_BACKEND}/agent/ws/{st.session_state.thread_id}"
+
+    async with websockets.connect(websocket_url) as ws:
+        # Send the message with collection_name as JSON
+        await ws.send(
+            json.dumps(
+                {
+                    "message": prompt,
+                    "collection_name": st.session_state.selected_collection,
+                }
+            )
+        )
+
+        # Receive streaming responses
+        while True:
+            try:
+                message = await ws.recv()
+
+                # Check if message is valid JSON and potentially contains control information
+                try:
+                    data = json.loads(message)
+                    # Only display final output or delta tokens, not intermediate steps
+                    if "type" in data:
+                        if data["type"] == "final":
+                            accumulated_response = data.get("content", "")
+                            message_placeholder.markdown(accumulated_response)
+                        elif data["type"] == "delta":
+                            # For token-by-token streaming
+                            accumulated_response += data.get("content", "")
+                            message_placeholder.markdown(accumulated_response)
+                    else:
+                        # Regular message content
+                        accumulated_response = data.get("content", message)
+                        message_placeholder.markdown(accumulated_response)
+                except json.JSONDecodeError:
+                    # Plain text message, just append it
+                    accumulated_response += message
+                    message_placeholder.markdown(accumulated_response)
+
+            except websockets.exceptions.ConnectionClosed:
+                break
+
+    # Only add the final accumulated response to the chat history
+    st.session_state.messages.append(
+        {"role": "assistant", "content": accumulated_response}
+    )
+
+
+# Display chat messages from history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Create a chat input field
-if prompt := st.chat_input("What is up?"):
-    # You can now access the selected collection with:
-    # st.session_state.selected_collection
-
-    # Store and display the current prompt.
+# Chat input
+if prompt := st.chat_input("What would you like to know?"):
+    # Add user message to chat history and display
     st.session_state.messages.append({"role": "user", "content": prompt})
+
+    # Display user message
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Convert session messages to LangChain format
-    langchain_messages = []
-    for m in st.session_state.messages:
-        if m["role"] == "user":
-            langchain_messages.append(HumanMessage(content=m["content"]))
-        elif m["role"] == "assistant":
-            langchain_messages.append(AIMessage(content=m["content"]))
-
-    # Stream the response to the chat using LangChain
+    # Create a placeholder for the assistant response
     with st.chat_message("assistant"):
-        response = ""
         message_placeholder = st.empty()
+        message_placeholder.markdown("Thinking...")
 
-        # Use LangChain's streaming capability
-        for chunk in client.stream(langchain_messages):
-            response += chunk.content
-            message_placeholder.markdown(response + "▌")
-        message_placeholder.markdown(response)
+        # Run the WebSocket communication
+        loop = asyncio.new_event_loop()
 
-    st.session_state.messages.append({"role": "assistant", "content": response})
+        def run_async_in_thread(loop, coro):
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(coro)
+
+        thread = threading.Thread(
+            target=run_async_in_thread,
+            args=(loop, communicate_via_websocket(prompt, message_placeholder)),
+        )
+        add_script_run_ctx(thread)
+        thread.start()
+        thread.join()

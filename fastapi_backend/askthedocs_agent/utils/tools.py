@@ -20,11 +20,11 @@ def search_vector_store(collection_name: str, query: str):
         query: The search query string
 
     Returns:
-        The search results from the vector store
+        The search results from the vector store. This includes their metadata which contains the sourceURL.
     """
     try:
         response = requests.post(
-            urljoin(FASTAPI_BACKEND, "/search"),
+            urljoin(FASTAPI_BACKEND, "vector-store/search"),
             json={"collection_name": collection_name, "query": query},
         )
         response.raise_for_status()  # Raise exception for 4XX/5XX responses

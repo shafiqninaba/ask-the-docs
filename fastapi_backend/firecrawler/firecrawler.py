@@ -19,6 +19,8 @@ class FirecrawlService:
                 **detail["data"].get("metadata", {}),
                 "root_url": self.root_url,
             }
+            # drop document key from metadata if it exists
+            metadata.pop("document", None)
 
             self.vector_store.add_documents(
                 collection_name="".join(
@@ -28,7 +30,6 @@ class FirecrawlService:
                 metadata=metadata,
                 id=str(uuid4()),
             )
-            logger.info(f"Document uploaded for URL: {metadata['url']}")
         except Exception as e:
             logger.error(f"Failed to upload document: {e}")
 

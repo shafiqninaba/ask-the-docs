@@ -11,6 +11,9 @@ from fastapi_backend.routers.vector_store.router import router as vector_store_r
 from fastapi_backend.routers.firecrawler.router import router as firecrawl_router
 from fastapi_backend.routers.agent.router import router as agent_router
 
+# Import the graph and memory for initialization
+from fastapi_backend.askthedocs_agent.agent import create_graph, memory
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -33,8 +36,12 @@ async def lifespan(app: FastAPI):
         firecrawl_api_url=os.environ.get("FIRECRAWL_API_URL"),
         vector_store=app.state.vector_store,
     )
-
     logger.info("Firecrawl service initialized")
+
+    # Initialize LangGraph
+    app.state.graph = create_graph()
+    app.state.memory = memory
+    logger.info("LangGraph agent initialized")
 
     yield
 
