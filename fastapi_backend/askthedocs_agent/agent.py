@@ -1,9 +1,9 @@
-from utils.state import State
-from utils.nodes import chatbot
+from fastapi_backend.askthedocs_agent.utils.state import State
+from fastapi_backend.askthedocs_agent.utils.nodes import chatbot
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv
 from langgraph.prebuilt import ToolNode, tools_condition
-from utils.tools import tools
+from fastapi_backend.askthedocs_agent.utils.tools import tools
 from langgraph.checkpoint.memory import MemorySaver
 from uuid import uuid4
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     for event in events:
         event["messages"][-1].pretty_print()
 
-    user_input = "Remember my name?"
+    user_input = "How do i implement a function in python?"
 
     # The config is the **second positional argument** to stream() or invoke()!
     events = graph.stream(

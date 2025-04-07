@@ -9,6 +9,7 @@ from fastapi_backend.db.vector_store import VectorStore
 from fastapi_backend.firecrawler.firecrawler import FirecrawlService
 from fastapi_backend.routers.vector_store.router import router as vector_store_router
 from fastapi_backend.routers.firecrawler.router import router as firecrawl_router
+from fastapi_backend.routers.agent.router import router as agent_router
 
 
 @asynccontextmanager
@@ -55,3 +56,4 @@ app.add_middleware(
 
 app.include_router(vector_store_router)
 app.include_router(firecrawl_router)
+app.include_router(agent_router)

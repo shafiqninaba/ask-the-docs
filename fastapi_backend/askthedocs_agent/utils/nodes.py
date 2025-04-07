@@ -1,6 +1,6 @@
 from langchain_openai import ChatOpenAI
-from utils.state import State
-from utils.tools import tools
+from fastapi_backend.askthedocs_agent.utils.state import State
+from fastapi_backend.askthedocs_agent.utils.tools import tools
 
 
 llm = ChatOpenAI(model="gpt-4o-mini")
