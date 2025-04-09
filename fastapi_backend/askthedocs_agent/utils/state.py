@@ -1,11 +1,13 @@
-from typing import Annotated
-
+from typing import Annotated, Sequence
 from typing_extensions import TypedDict
+
+from langchain_core.messages import BaseMessage
+
 from langgraph.graph.message import add_messages
 
 
-class State(TypedDict):
-    # Messages have the type "list". The `add_messages` function
-    # in the annotation defines how this state key should be updated
-    # (in this case, it appends messages to the list, rather than overwriting them)
-    messages: Annotated[list, add_messages]
+class AgentState(TypedDict):
+    # The add_messages function defines how an update should be processed
+    # Default is to replace. add_messages says "append"
+    messages: Annotated[Sequence[BaseMessage], add_messages]
+    collection_name: str

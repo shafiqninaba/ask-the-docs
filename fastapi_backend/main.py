@@ -11,8 +11,8 @@ from fastapi_backend.routers.vector_store.router import router as vector_store_r
 from fastapi_backend.routers.firecrawler.router import router as firecrawl_router
 from fastapi_backend.routers.agent.router import router as agent_router
 
-# Import the graph and memory for initialization
-from fastapi_backend.askthedocs_agent.agent import create_graph, memory
+# Import the refactored LangGraph agent
+from fastapi_backend.askthedocs_agent.agent import create_graph
 
 
 @asynccontextmanager
@@ -38,10 +38,9 @@ async def lifespan(app: FastAPI):
     )
     logger.info("Firecrawl service initialized")
 
-    # Initialize LangGraph
+    # Initialize the refactored LangGraph agent using the lifespan event
     app.state.graph = create_graph()
-    app.state.memory = memory
-    logger.info("LangGraph agent initialized")
+    logger.info("LangGraph initialized")
 
     yield
 
@@ -55,7 +54,7 @@ app = FastAPI(lifespan=lifespan)
 # Allow Streamlit frontend to connect
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Set to your frontend origin in production
+    allow_origins=["*"],  # Update with your frontend origin as needed
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
