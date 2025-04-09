@@ -44,6 +44,6 @@ async def chat(thread_id: str, request: Request, payload: dict):
                 pprint.pprint(f"Output from node '{key}':")
                 pprint.pprint(value)
                 # Yield the output as a server-sent event
-                yield f"data: {value}\n\n"
+                yield f"data: {value["messages"][0]}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
