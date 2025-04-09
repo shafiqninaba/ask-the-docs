@@ -4,6 +4,7 @@ from langchain_core.messages import HumanMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
 from fastapi_backend.askthedocs_agent.utils.tools import tools
+from langchain_core.prompts import PromptTemplate
 
 
 def agent(state):
@@ -77,7 +78,12 @@ def generate(state):
     docs = last_message.content
 
     # Prompt
-    prompt = hub.pull("rlm/rag-prompt")
+    prompt = PromptTemplate.from_template("""
+You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know.
+Question: {question}
+Context: {context}
+Answer:
+""")
 
     # LLM
     llm = ChatOpenAI(model_name="gpt-4o-mini", temperature=0, streaming=True)

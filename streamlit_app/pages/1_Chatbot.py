@@ -148,9 +148,11 @@ def get_chat_response(prompt, message_placeholder):
                         ):
                             if current_stage != "answering":
                                 current_stage = "answering"
-                                message_placeholder.markdown(extract_content(chunk))
-
-            return full_response
+                                answer = extract_content(chunk)
+                                message_placeholder.markdown(
+                                    answer, unsafe_allow_html=True
+                                )
+                                return answer
 
     except requests.RequestException as e:
         error_message = f"Error communicating with backend: {str(e)}"
@@ -169,7 +171,7 @@ for message in st.session_state.messages:
         "content", ""
     )  # Default to empty string if content is missing
     with st.chat_message(role):
-        st.markdown(content)
+        st.markdown(content, unsafe_allow_html=True)
 
 # Chat input
 if prompt := st.chat_input("What would you like to know?"):
@@ -187,3 +189,11 @@ if prompt := st.chat_input("What would you like to know?"):
 
         # Get response from FastAPI backend with streaming
         response = get_chat_response(prompt, message_placeholder)
+
+        # Extract the final content from the full response
+        final_content = extract_content(response)
+
+        # Add assistant response to chat history
+        st.session_state.messages.append(
+            {"role": "assistant", "content": final_content}
+        )
