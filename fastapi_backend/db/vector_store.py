@@ -21,7 +21,9 @@ class VectorStore:
 
     async def search_result(self, collection_name: str, query: str):
         """Search for a result in the vector store."""
-        return self.client.query(collection_name=collection_name, query_text=query)
+        return self.client.query(
+            collection_name=collection_name, query_text=query, limit=1
+        )
 
     def create_collection(self, collection_name: str):
         """Create a new collection in the vector store."""

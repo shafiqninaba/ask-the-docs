@@ -53,27 +53,3 @@ def create_graph():
 
     graph = workflow.compile(checkpointer=MemorySaver())
     return graph
-
-
-if __name__ == "__main__":
-    import pprint
-
-    graph = create_graph()
-    # Build the initial state for the agent graph with a system message included.
-    state = {
-        "messages": [
-            {
-                "role": "system",
-                "content": "You are an assistant helping with documentation. Use the httpswwwscrapethissitecom collection to query relevant information from the vector store ONLY IF you deem that it is required. If you query from the vector store, please provide the source of the information that can be found in the metadata.",
-            },
-            {"role": "user", "content": "What does this site say about hockey?"},
-        ],
-        "collection_name": "httpswwwscrapethissitecom",
-    }
-
-    for output in graph.stream(state):
-        for key, value in output.items():
-            pprint.pprint(f"Output from node '{key}':")
-            pprint.pprint("---")
-            pprint.pprint(value, indent=2, width=80, depth=None)
-        pprint.pprint("\n---\n")

@@ -25,7 +25,7 @@ async def websocket_endpoint(websocket: WebSocket):
     async def send_periodic_pings():
         try:
             while True:
-                await asyncio.sleep(15)  # Send ping every 15 seconds
+                await asyncio.sleep(120)  # Send ping every 15 seconds
                 await websocket.send_bytes(b"")  # Simple ping as empty bytes
                 logger.debug("Ping sent to client")
         except asyncio.CancelledError:

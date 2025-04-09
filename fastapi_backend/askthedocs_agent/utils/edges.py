@@ -1,7 +1,7 @@
 from typing import Literal
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
-
+from fastapi_backend.askthedocs_agent.utils.tools import tools
 from pydantic import BaseModel, Field
 from loguru import logger
 
@@ -29,7 +29,7 @@ def grade_documents(state) -> Literal["generate", "rewrite"]:
     model = ChatOpenAI(temperature=0, model="gpt-4o", streaming=True)
 
     # LLM with tool and validation
-    llm_with_tool = model.with_structured_output(grade)
+    llm_with_tool = model.bind_tools(tools=tools).with_structured_output(grade)
 
     # Prompt
     prompt = PromptTemplate(

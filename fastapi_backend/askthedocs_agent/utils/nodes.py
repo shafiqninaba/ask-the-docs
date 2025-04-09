@@ -19,7 +19,7 @@ def agent(state):
     """
     print("---CALL AGENT---")
     messages = state["messages"]
-    model = ChatOpenAI(temperature=0, streaming=True, model="gpt-4-turbo")
+    model = ChatOpenAI(temperature=0, streaming=True, model="gpt-4o-mini")
     model = model.bind_tools(tools)
     response = model.invoke(messages)
     # We return a list, because this will get added to the existing list

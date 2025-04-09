@@ -40,9 +40,10 @@ async def chat(thread_id: str, request: Request, payload: dict):
         # Iterate over the graph's streaming output
         for output in graph.stream(state, config=config):
             for key, value in output.items():
+                # Log the output from each node
                 pprint.pprint(f"Output from node '{key}':")
-                pprint.pprint("---")
-                pprint.pprint(value, indent=2, width=80, depth=None)
-            pprint.pprint("\n---\n")
+                pprint.pprint(value)
+                # Yield the output as a server-sent event
+                yield f"data: {value}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")

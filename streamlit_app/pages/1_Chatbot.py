@@ -4,6 +4,7 @@ import requests
 from urllib.parse import urljoin
 import os
 import uuid
+from loguru import logger
 
 load_dotenv()
 
@@ -40,6 +41,10 @@ if collections:
         if st.session_state.selected_collection in collections
         else 0,
     )
+    # Clear conversation history when collection changes
+    if st.session_state.selected_collection != selected_collection:
+        st.session_state.messages = []
+        st.session_state.thread_id = str(uuid.uuid4())
     st.session_state.selected_collection = selected_collection
 else:
     st.warning("No collections available. Please check your API connection.")
@@ -71,10 +76,18 @@ def get_chat_response(prompt):
         return f"Error communicating with backend: {str(e)}"
 
 
-# Display chat messages from history
+# Initialize session states
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    # Add error handling for message structure
+    role = message.get("role", "user")  # Default to "user" if role is missing
+    content = message.get(
+        "content", ""
+    )  # Default to empty string if content is missing
+    with st.chat_message(role):
+        st.markdown(content)
 
 # Chat input
 if prompt := st.chat_input("What would you like to know?"):
@@ -92,6 +105,7 @@ if prompt := st.chat_input("What would you like to know?"):
 
         # Get response from FastAPI backend
         response = get_chat_response(prompt)
+        logger.info(f"collection: {st.session_state.selected_collection}")
 
         # Update placeholder with the response
         message_placeholder.markdown(response)

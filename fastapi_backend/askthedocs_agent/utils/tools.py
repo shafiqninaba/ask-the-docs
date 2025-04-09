@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import requests
 import os
 from urllib.parse import urljoin
+from loguru import logger
 
 load_dotenv()
 tavily_tool = TavilySearchResults(max_results=2)
@@ -24,12 +25,14 @@ def search_vector_store(collection_name: str, query: str):
     """
     try:
         response = requests.post(
-            urljoin(FASTAPI_BACKEND, "vector-store/search"),
+            urljoin(FASTAPI_BACKEND, "/vector-store/search"),
             json={"collection_name": collection_name, "query": query},
         )
-        response.raise_for_status()  # Raise exception for 4XX/5XX responses
+        response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
+        # Add more detailed logging here
+        logger.error(f"Error in search_vector_store: {str(e)}")
         return f"Error searching vector store: {str(e)}"
 
 
