@@ -4,17 +4,10 @@ import requests
 from urllib.parse import urljoin
 import os
 import uuid
-import asyncio
-import websockets
-import json
-from streamlit.runtime.scriptrunner import add_script_run_ctx
-import threading
 
 load_dotenv()
 
 FASTAPI_BACKEND = os.getenv("FASTAPI_BACKEND")
-# Convert HTTP URL to WebSocket URL
-WS_BACKEND = FASTAPI_BACKEND.replace("http://", "ws://").replace("https://", "wss://")
 
 
 # Function to fetch collections from the API
@@ -59,54 +52,23 @@ if "thread_id" not in st.session_state:
     st.session_state.thread_id = str(uuid.uuid4())
 
 
-async def communicate_via_websocket(prompt, message_placeholder):
-    accumulated_response = ""
-    websocket_url = f"{WS_BACKEND}/agent/ws/{st.session_state.thread_id}"
+def get_chat_response(prompt):
+    """Get chat response from FastAPI backend using POST request"""
+    try:
+        endpoint = urljoin(FASTAPI_BACKEND, f"/agent/chat/{st.session_state.thread_id}")
+        payload = {
+            "message": prompt,
+            "collection_name": st.session_state.selected_collection,
+        }
 
-    async with websockets.connect(websocket_url) as ws:
-        # Send the message with collection_name as JSON
-        await ws.send(
-            json.dumps(
-                {
-                    "message": prompt,
-                    "collection_name": st.session_state.selected_collection,
-                }
-            )
-        )
+        response = requests.post(endpoint, json=payload)
+        response.raise_for_status()
 
-        # Receive streaming responses
-        while True:
-            try:
-                message = await ws.recv()
+        data = response.json()
+        return data.get("response", "No response received")
 
-                # Check if message is valid JSON and potentially contains control information
-                try:
-                    data = json.loads(message)
-                    # Only display final output or delta tokens, not intermediate steps
-                    if "type" in data:
-                        if data["type"] == "final":
-                            accumulated_response = data.get("content", "")
-                            message_placeholder.markdown(accumulated_response)
-                        elif data["type"] == "delta":
-                            # For token-by-token streaming
-                            accumulated_response += data.get("content", "")
-                            message_placeholder.markdown(accumulated_response)
-                    else:
-                        # Regular message content
-                        accumulated_response = data.get("content", message)
-                        message_placeholder.markdown(accumulated_response)
-                except json.JSONDecodeError:
-                    # Plain text message, just append it
-                    accumulated_response += message
-                    message_placeholder.markdown(accumulated_response)
-
-            except websockets.exceptions.ConnectionClosed:
-                break
-
-    # Only add the final accumulated response to the chat history
-    st.session_state.messages.append(
-        {"role": "assistant", "content": accumulated_response}
-    )
+    except requests.RequestException as e:
+        return f"Error communicating with backend: {str(e)}"
 
 
 # Display chat messages from history
@@ -128,17 +90,11 @@ if prompt := st.chat_input("What would you like to know?"):
         message_placeholder = st.empty()
         message_placeholder.markdown("Thinking...")
 
-        # Run the WebSocket communication
-        loop = asyncio.new_event_loop()
+        # Get response from FastAPI backend
+        response = get_chat_response(prompt)
 
-        def run_async_in_thread(loop, coro):
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(coro)
+        # Update placeholder with the response
+        message_placeholder.markdown(response)
 
-        thread = threading.Thread(
-            target=run_async_in_thread,
-            args=(loop, communicate_via_websocket(prompt, message_placeholder)),
-        )
-        add_script_run_ctx(thread)
-        thread.start()
-        thread.join()
+        # Add response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": response})
