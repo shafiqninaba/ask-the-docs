@@ -1,3 +1,9 @@
+"""
+This script defines the tools used in the agent workflow.
+This module contains the function to search the vector store for relevant documents.
+It also includes the TavilySearchResults tool for searching Tavily.
+"""
+
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.tools import tool
 from dotenv import load_dotenv

@@ -1,3 +1,8 @@
+"""
+This script defines the edges of the agent workflow.
+This module contains the function to check the relevance of retrieved documents to the user question.
+"""
+
 from typing import Literal
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI

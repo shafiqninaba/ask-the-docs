@@ -1,3 +1,8 @@
+"""
+This script defines the nodes of the agent workflow.
+This module contains the function to invoke the agent model, re-write the question, and generate an answer.
+"""
+
 from loguru import logger
 from langchain import hub
 from langchain_core.messages import HumanMessage

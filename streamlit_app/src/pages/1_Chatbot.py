@@ -1,3 +1,8 @@
+"""
+This page is the chatbot interface for the AskTheDocs application.
+This page allows users to interact with the chatbot, select collections, and view conversation history.
+"""
+
 import streamlit as st
 from dotenv import load_dotenv
 import requests
@@ -14,6 +19,13 @@ FASTAPI_BACKEND = os.getenv("FASTAPI_BACKEND")
 
 # Function to fetch collections from the API
 def fetch_collections():
+    """
+    Fetch collections from the FastAPI backend.
+    This function makes a request to the FastAPI backend to retrieve the available collections.
+
+    Returns:
+        list: A list of collection names.
+    """
     try:
         response = requests.post(urljoin(FASTAPI_BACKEND, "/vector-store/collections"))
         data = response.json()
@@ -61,6 +73,15 @@ if "thread_id" not in st.session_state:
 
 
 def extract_content(chunk):
+    """
+    Extract the content from the chunk using regex.
+
+    Args:
+        chunk (str): The chunk of text to extract content from.
+
+    Returns:
+        str: The extracted content.
+    """
     # Using regex to extract the content between content=" or content=' and the closing quote
     pattern = r'content=(["\'])(.*?)\1 additional_kwargs='
     match = re.search(pattern, chunk, re.DOTALL)
@@ -77,7 +98,15 @@ def extract_content(chunk):
 
 
 def get_chat_response(prompt, message_placeholder):
-    """Get chat response from FastAPI backend using streaming response"""
+    """Get chat response from FastAPI backend using streaming response
+
+    Args:
+        prompt (str): The user input prompt.
+        message_placeholder: Placeholder for the assistant response.
+
+    Returns:
+        str: The assistant's response.
+    """
     try:
         endpoint = urljoin(FASTAPI_BACKEND, f"/agent/chat/{st.session_state.thread_id}")
         payload = {

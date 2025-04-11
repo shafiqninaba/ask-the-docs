@@ -1,3 +1,7 @@
+"""
+WebSocket endpoint for Firecrawl service.
+"""
+
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from loguru import logger
 from dotenv import load_dotenv
@@ -10,6 +14,12 @@ router = APIRouter(prefix="/firecrawl", tags=["firecrawl"])
 
 @router.websocket("/ws/crawl")
 async def websocket_endpoint(websocket: WebSocket):
+    """
+    WebSocket endpoint for Firecrawl service.
+
+    Args:
+        websocket (WebSocket): The WebSocket connection object.
+    """
     await websocket.accept()
     try:
         firecrawl_app = websocket.app.state.firecrawl_service

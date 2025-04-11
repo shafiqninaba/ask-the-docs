@@ -1,3 +1,8 @@
+"""
+This script defines the main agent workflow for the AskTheDocs agent.
+This module creates the graph for the agent, which includes nodes and edges.
+"""
+
 from fastapi_backend.src.askthedocs_agent.utils.state import AgentState
 from fastapi_backend.src.askthedocs_agent.utils.nodes import agent, rewrite, generate
 from fastapi_backend.src.askthedocs_agent.utils.edges import grade_documents

@@ -1,3 +1,8 @@
+"""
+Router for the agent endpoint.
+It includes the chat endpoint that streams agent responses.
+"""
+
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import StreamingResponse
 import pprint
@@ -9,9 +14,20 @@ router = APIRouter(prefix="/agent", tags=["agent"])
 async def chat(thread_id: str, request: Request, payload: dict):
     """
     Endpoint to stream agent responses.
-    Expects a JSON payload with keys:
-      - message: the user’s message
-      - collection_name: name of the collection to query
+
+    Args:
+        thread_id (str): The ID of the thread for the agent.
+        request (Request): The FastAPI request object.
+        payload (dict): The payload containing the message and collection name.
+
+            {
+                "message": "Your message here",
+                "collection_name": "your_collection_name"
+            }
+
+
+    Returns:
+        StreamingResponse: A streaming response that yields the agent's responses.
     """
     message = payload.get("message")
     collection_name = payload.get("collection_name")

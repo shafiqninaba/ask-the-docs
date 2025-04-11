@@ -1,3 +1,7 @@
+"""
+Main entry point for the FastAPI application.
+"""
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from loguru import logger
@@ -19,6 +23,13 @@ from fastapi_backend.src.askthedocs_agent.agent import create_graph
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Lifespan event for FastAPI application.
+    This function initializes the application state on startup and cleans up resources on shutdown.
+
+    Args:
+        app (FastAPI): The FastAPI application instance.
+    """
     # Startup
     load_dotenv()
 

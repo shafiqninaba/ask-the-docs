@@ -1,3 +1,8 @@
+"""
+Crawler page for Firecrawl Streamlit app.
+This page allows users to input a URL and start a crawl, displaying real-time stats and messages.
+"""
+
 import streamlit as st
 import asyncio
 import websockets
@@ -57,6 +62,9 @@ if st.session_state["is_crawling"]:
     messages_placeholder = st.empty()
 
     async def crawl():
+        """
+        Crawl the given URL using WebSocket connection.
+        """
         try:
             async with websockets.connect(WEBSOCKET_URL) as websocket:
                 await websocket.send(json.dumps({"url": url, "limit": limit - 1}))
