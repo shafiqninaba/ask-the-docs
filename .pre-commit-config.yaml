@@ -33,10 +33,10 @@ repos:
     hooks:
       - id: commitizen
 
-  # - repo: https://github.com/econchick/interrogate
-  #   rev: 1.7.0
-  #   hooks:
-  #     - id: interrogate
-  #       args: [-c, pyproject.toml]
-  #       exclude: tests
-  #       pass_filenames: false  # needed if excluding files with pyproject.toml or setup.cfg
+  - repo: https://github.com/econchick/interrogate
+    rev: 1.7.0
+    hooks:
+      - id: interrogate
+        args: [-c, pyproject.toml]
+        exclude: tests
+        pass_filenames: false  # needed if excluding files with pyproject.toml or setup.cfg
