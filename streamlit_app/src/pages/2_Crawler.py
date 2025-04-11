@@ -42,7 +42,7 @@ button_container = st.empty()
 # Only show the button if we're not currently crawling
 if not st.session_state["is_crawling"]:
     if button_container.button("Start Crawl", key="start_crawl_button") and url:
-        st.session_state["messages"] = []
+        st.session_state["firecrawler_messages"] = []
         st.session_state["stats"] = {"pages": 0, "errors": 0}
         st.session_state["crawled_urls"] = []  # Add list to store crawled URLs
         st.session_state["is_crawling"] = True
@@ -84,7 +84,7 @@ if st.session_state["is_crawling"]:
 
                                 if data["event"] == "document":
                                     st.session_state["stats"]["pages"] += 1
-                                    st.session_state["messages"].append(
+                                    st.session_state["firecrawler_messages"].append(
                                         {
                                             "type": "document",
                                             "content": f"Crawled: {data['url']}",
@@ -96,7 +96,7 @@ if st.session_state["is_crawling"]:
                                     )
                                 elif data["event"] == "error":
                                     st.session_state["stats"]["errors"] += 1
-                                    st.session_state["messages"].append(
+                                    st.session_state["firecrawler_messages"].append(
                                         {
                                             "type": "error",
                                             "content": f"Error: {data['error']}",
@@ -104,7 +104,7 @@ if st.session_state["is_crawling"]:
                                         }
                                     )
                                 elif data["event"] == "done":
-                                    st.session_state["messages"].append(
+                                    st.session_state["firecrawler_messages"].append(
                                         {
                                             "type": "done",
                                             "content": f"Done: {data['status']}",
@@ -146,11 +146,11 @@ if st.session_state["is_crawling"]:
 
                 except websockets.exceptions.ConnectionClosedOK:
                     # Connection closed normally, make sure we show the final status
-                    if st.session_state["messages"] and "done" not in [
-                        m["type"] for m in st.session_state["messages"]
+                    if st.session_state["firecrawler_messages"] and "done" not in [
+                        m["type"] for m in st.session_state["firecrawler_messages"]
                     ]:
                         timestamp = datetime.now().strftime("%H:%M:%S")
-                        st.session_state["messages"].append(
+                        st.session_state["firecrawler_messages"].append(
                             {
                                 "type": "done",
                                 "content": "Crawl completed",
