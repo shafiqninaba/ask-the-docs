@@ -2,7 +2,7 @@ from loguru import logger
 from langchain import hub
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
-from fastapi_backend.askthedocs_agent.utils.tools import tools
+from fastapi_backend.src.askthedocs_agent.utils.tools import tools
 from langchain_core.prompts import PromptTemplate
 
 

@@ -5,14 +5,16 @@ from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from qdrant_client import QdrantClient
-from fastapi_backend.db.vector_store import VectorStore
-from fastapi_backend.firecrawler.firecrawler import FirecrawlService
-from fastapi_backend.routers.vector_store.router import router as vector_store_router
-from fastapi_backend.routers.firecrawler.router import router as firecrawl_router
-from fastapi_backend.routers.agent.router import router as agent_router
+from fastapi_backend.src.db.vector_store import VectorStore
+from fastapi_backend.src.firecrawler.firecrawler import FirecrawlService
+from fastapi_backend.src.routers.vector_store.router import (
+    router as vector_store_router,
+)
+from fastapi_backend.src.routers.firecrawler.router import router as firecrawl_router
+from fastapi_backend.src.routers.agent.router import router as agent_router
 
 # Import the refactored LangGraph agent
-from fastapi_backend.askthedocs_agent.agent import create_graph
+from fastapi_backend.src.askthedocs_agent.agent import create_graph
 
 
 @asynccontextmanager

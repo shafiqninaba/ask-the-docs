@@ -1,0 +1,11 @@
+[project]
+dependencies = [
+  "python-dotenv>=1.1.0",
+  "streamlit>=1.44.1",
+  "websockets==10.1"
+]
+description = "Frontend for ask-the-docs."
+name = "streamlit-app"
+readme = "README.md"
+requires-python = ">=3.12"
+version = "0.1.0"

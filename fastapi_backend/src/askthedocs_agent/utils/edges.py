@@ -1,7 +1,7 @@
 from typing import Literal
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
-from fastapi_backend.askthedocs_agent.utils.tools import tools
+from fastapi_backend.src.askthedocs_agent.utils.tools import tools
 from pydantic import BaseModel, Field
 from loguru import logger
 

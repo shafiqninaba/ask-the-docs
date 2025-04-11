@@ -118,42 +118,16 @@ wheels = [
 [[package]]
 name = "ask-the-docs"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
-    { name = "fastapi", extra = ["standard"] },
-    { name = "fastembed" },
-    { name = "firecrawl-py" },
-    { name = "langchain-community" },
-    { name = "langchain-openai" },
-    { name = "langgraph" },
-    { name = "loguru" },
-    { name = "pre-commit" },
-    { name = "pydantic" },
-    { name = "python-dotenv" },
-    { name = "qdrant-client" },
-    { name = "sseclient-py" },
-    { name = "streamlit" },
-    { name = "tavily-python" },
-    { name = "websockets" },
+    { name = "fastapi-backend" },
+    { name = "streamlit-app" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
-    { name = "fastembed", specifier = ">=0.6.0" },
-    { name = "firecrawl-py", specifier = ">=1.15.0" },
-    { name = "langchain-community", specifier = ">=0.3.20" },
-    { name = "langchain-openai", specifier = ">=0.3.12" },
-    { name = "langgraph", specifier = ">=0.3.24" },
-    { name = "loguru", specifier = ">=0.7.3" },
-    { name = "pre-commit", specifier = ">=4.2.0" },
-    { name = "pydantic", specifier = ">=2.11.1" },
-    { name = "python-dotenv", specifier = ">=1.1.0" },
-    { name = "qdrant-client", specifier = ">=1.13.3" },
-    { name = "sseclient-py", specifier = ">=1.8.0" },
-    { name = "streamlit", specifier = ">=1.44.1" },
-    { name = "tavily-python", specifier = ">=0.5.4" },
-    { name = "websockets", specifier = "==10.1" },
+    { name = "fastapi-backend", virtual = "fastapi_backend" },
+    { name = "streamlit-app", virtual = "streamlit_app" },
 ]
 
 [[package]]
@@ -377,6 +351,45 @@ standard = [
     { name = "jinja2" },
     { name = "python-multipart" },
     { name = "uvicorn", extra = ["standard"] },
+]
+
+[[package]]
+name = "fastapi-backend"
+version = "0.1.0"
+source = { virtual = "fastapi_backend" }
+dependencies = [
+    { name = "fastapi", extra = ["standard"] },
+    { name = "fastembed" },
+    { name = "firecrawl-py" },
+    { name = "langchain-community" },
+    { name = "langchain-openai" },
+    { name = "langgraph" },
+    { name = "loguru" },
+    { name = "pre-commit" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "qdrant-client" },
+    { name = "sseclient-py" },
+    { name = "tavily-python" },
+    { name = "websockets" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
+    { name = "fastembed", specifier = ">=0.6.0" },
+    { name = "firecrawl-py", specifier = ">=1.15.0" },
+    { name = "langchain-community", specifier = ">=0.3.20" },
+    { name = "langchain-openai", specifier = ">=0.3.12" },
+    { name = "langgraph", specifier = ">=0.3.24" },
+    { name = "loguru", specifier = ">=0.7.3" },
+    { name = "pre-commit", specifier = ">=4.2.0" },
+    { name = "pydantic", specifier = ">=2.11.1" },
+    { name = "python-dotenv", specifier = ">=1.1.0" },
+    { name = "qdrant-client", specifier = ">=1.13.3" },
+    { name = "sseclient-py", specifier = ">=1.8.0" },
+    { name = "tavily-python", specifier = ">=0.5.4" },
+    { name = "websockets", specifier = "==10.1" },
 ]
 
 [[package]]
@@ -2115,6 +2128,23 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/3e/c0/7286284567e5045f0c587c426d0c41aee5d10c0a2e360e627a83037e9f0c/streamlit-1.44.1.tar.gz", hash = "sha256:c6914ed6d5b76870b461510476806db370f36425ae0e6654d227c988288198d3", size = 9423685 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/eb/17/fc425e1d4d86e31b2aaf0812a2ef2163763a0670d671720c7c36e8679323/streamlit-1.44.1-py3-none-any.whl", hash = "sha256:9fe355f58b11f4eb71e74f115ce1f38c4c9eaff2733e6bcffb510ac1298a5990", size = 9812242 },
+]
+
+[[package]]
+name = "streamlit-app"
+version = "0.1.0"
+source = { virtual = "streamlit_app" }
+dependencies = [
+    { name = "python-dotenv" },
+    { name = "streamlit" },
+    { name = "websockets" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "python-dotenv", specifier = ">=1.1.0" },
+    { name = "streamlit", specifier = ">=1.44.1" },
+    { name = "websockets", specifier = "==10.1" },
 ]
 
 [[package]]

@@ -1,10 +1,10 @@
-from fastapi_backend.askthedocs_agent.utils.state import AgentState
-from fastapi_backend.askthedocs_agent.utils.nodes import agent, rewrite, generate
-from fastapi_backend.askthedocs_agent.utils.edges import grade_documents
+from fastapi_backend.src.askthedocs_agent.utils.state import AgentState
+from fastapi_backend.src.askthedocs_agent.utils.nodes import agent, rewrite, generate
+from fastapi_backend.src.askthedocs_agent.utils.edges import grade_documents
 from langgraph.graph import StateGraph
 from dotenv import load_dotenv
 from langgraph.prebuilt import ToolNode, tools_condition
-from fastapi_backend.askthedocs_agent.utils.tools import tools
+from fastapi_backend.src.askthedocs_agent.utils.tools import tools
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START
 

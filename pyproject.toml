@@ -1,23 +1,16 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
 [project]
-dependencies = [
-  "fastapi[standard]>=0.115.12",
-  "fastembed>=0.6.0",
-  "firecrawl-py>=1.15.0",
-  "langchain-community>=0.3.20",
-  "langchain-openai>=0.3.12",
-  "langgraph>=0.3.24",
-  "loguru>=0.7.3",
-  "pre-commit>=4.2.0",
-  "pydantic>=2.11.1",
-  "python-dotenv>=1.1.0",
-  "qdrant-client>=1.13.3",
-  "sseclient-py>=1.8.0",
-  "streamlit>=1.44.1",
-  "tavily-python>=0.5.4",
-  "websockets==10.1"
-]
-description = "An application that allows you to ask questions and get answers from crawled websites."
+dependencies = ["fastapi-backend", "streamlit-app"]
 name = "ask-the-docs"
-readme = "README.md"
 requires-python = ">=3.12"
 version = "0.1.0"
+
+[tool.hatch.build.targets.wheel]
+packages = ["fastapi_backend", "streamlit_app"]
+
+[tool.uv.sources]
+fastapi-backend = {path = "fastapi_backend"}
+streamlit-app = {path = "streamlit_app"}

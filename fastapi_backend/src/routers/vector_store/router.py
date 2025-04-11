@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from fastapi_backend.models.vector_store import DocumentInput, SearchQuery
-from fastapi_backend.db.vector_store import VectorStore
+from fastapi_backend.src.models.vector_store import DocumentInput, SearchQuery
+from fastapi_backend.src.db.vector_store import VectorStore
 from fastapi import Request
 
 router = APIRouter(prefix="/vector-store", tags=["vector-store"])
