@@ -1,7 +1,6 @@
 from loguru import logger
 from langchain import hub
 from langchain_core.messages import HumanMessage
-from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
 from fastapi_backend.askthedocs_agent.utils.tools import tools
 from langchain_core.prompts import PromptTemplate
@@ -93,7 +92,7 @@ Answer:
         return "\n\n".join(doc.page_content for doc in docs)
 
     # Chain
-    rag_chain = prompt | llm | StrOutputParser()
+    rag_chain = prompt | llm
 
     # Run
     response = rag_chain.invoke({"context": docs, "question": question})
