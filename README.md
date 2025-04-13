@@ -68,7 +68,11 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://askthedocs-frontend.proudsea-4857eb40.canadacentral.azurecontainerapps.io/)
 
-This is a personal project to demonstrate the use of an agentic Retrieval-Augmented Generation (RAG) workflow for a chatbot that helps users find more information about the websites that the user has sent for crawling. The chatbot is built using `LangGraph`, `OpenAI`'s `GPT-4o-mini` for the chat model, `Qdrant` (self-hosted) for the vector store and `Firecrawl` (self-hosted) for the web crawling service. The chatbot is hosted on `Azure` and can be accessed [here](https://askthedocs-frontend.proudsea-4857eb40.canadacentral.azurecontainerapps.io/). The chatbot is password-protected, so please message me on [LinkedIn](https://linkedin.com/in/shafiq-ninaba) for the password.
+This is a personal project to demonstrate the use of an agentic Retrieval-Augmented Generation (RAG) workflow for a chatbot that helps users find more information about the websites that the user has sent for crawling. The chatbot is built using `LangGraph`, `OpenAI`'s `GPT-4o-mini` for the chat model, `Qdrant` (self-hosted) for the vector store and `Firecrawl` (self-hosted) for the web crawling service.
+
+The use case for this project is to provide a chatbot that can answer questions about the documentation of a website. Most of the time, documentation can get really convoluted and is hard to navigate. This app aims to provide a solution to this problem by allowing users to crawl the documentation of a website and then ask questions about it. The chatbot will then use the crawled data to answer the questions via an agentic RAG pipeline.
+
+The app is hosted on `Azure` and can be accessed [here](https://askthedocs-frontend.proudsea-4857eb40.canadacentral.azurecontainerapps.io/). The app is password-protected, so please message me on [LinkedIn](https://linkedin.com/in/shafiq-ninaba) for the password.
 
 ### Description
 
@@ -127,24 +131,28 @@ The entire workflow is orchestrated through `LangGraph`'s `StateGraph` system, w
 <!-- DEMO -->
 ## Demo
 
-<div align="center">
-  <img src="assets/images/homepage.jpg" alt="Homepage"> <p><em>Figure 1: Ask The Docs Homepage Interface</em></p>
-</div>
+The gifs below showcase the key features of the application, including the document crawling and indexing process, the agentic RAG chatbot interaction, and the web search fallback capability.
+
+### Firecrawl Demo
 
 <div align="center">
-  <img src="assets/gifs/firecrawler.gif" alt="Firecrawler Demo"> <p><em>Figure 2: Document Crawling and Indexing Process</em></p>
+  <img src="assets/gifs/firecrawler.gif" alt="Firecrawler Demo"> <p><em>Figure 1: Document Crawling and Indexing Process</em></p>
 </div>
 
 This gif shows the document crawling and indexing functionality in action. When a user inputs a URL, the `Firecrawl` web crawling service that is self-hosted on `DigitalOcean` efficiently traverses through documentation sources, extracting relevant content, and processes it for the vector database. This automated process ensures that all documentation is properly indexed and ready for semantic search and retrieval.
 
+### Agentic RAG Chatbot Demo
+
 <div align="center">
-  <img src="assets/gifs/chatbot.gif" alt="Chatbot Demo"> <p><em>Figure 3: Agentic RAG Chatbot Interaction</em></p>
+  <img src="assets/gifs/chatbot.gif" alt="Chatbot Demo"> <p><em>Figure 2: Agentic RAG Chatbot Interaction</em></p>
 </div>
 
 The chatbot interaction demonstrates the agentic RAG pipeline in practice. Users can ask complex questions about the documentation, and the system intelligently processes these queries, retrieves relevant information from the vector store, and generates comprehensive, accurate responses. Note how the system handles follow-up questions and maintains context throughout the conversation.
 
+### Web Search Fallback Capability
+
 <div align="center">
-  <img src="assets/gifs/websearch.gif" alt="Web Search Demo"> <p><em>Figure 4: Web Search Fallback Capability</em></p>
+  <img src="assets/gifs/websearch.gif" alt="Web Search Demo"> <p><em>Figure 3: Web Search Fallback Capability</em></p>
 </div>
 
 When information isn't available in the indexed documentation, the system seamlessly falls back to web search capabilities. This demonstration shows how the application leverages Tavily web search to supplement its knowledge base, ensuring users receive helpful responses even for queries that go beyond the scope of the ingested documentation.
@@ -221,7 +229,7 @@ Shafiq Ninaba | shafiqninaba@gmail.com | [LinkedIn](https://linkedin.com/in/shaf
 [issues-url]: https://github.com/shafiqninaba/ask-the-docs/issues
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/shafiq-ninaba
-[product-screenshot]: assets/images/screenshot.png
+[product-screenshot]: assets/images/homepage.jpg
 [Python-img]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
 [Python-url]: https://www.python.org/
 [uv-img]: https://img.shields.io/badge/uv-package%20manager-blueviolet
