@@ -7,9 +7,9 @@
 <br />
 <div align="center">
   <a href="https://github.com/shafiqninaba/ask-the-docs">
-    <img src="assets/images/logo.png" alt="Logo" width="100" height="100">
+    <img src="assets/images/logo.png" alt="Logo" height="400" width="400">
   </a>
-<h3 align="center">Ask the Docs</h3>
+<h2 align="center">Ask the Docs</h2>
 
   <p align="center">
     An application that uses an Agentic RAG pipeline to retrieve information from the vector store using Qdrant that contains crawled websites via Firecrawl.
