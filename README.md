@@ -14,8 +14,6 @@
   <p align="center">
     An application that uses an Agentic RAG pipeline to retrieve information from the vector store using Qdrant that contains crawled websites via Firecrawl.
     <br />
-    <a href="https://askthedocs-frontend.proudsea-4857eb40.canadacentral.azurecontainerapps.io/">View Demo</a> (message me on <a href="https://linkedin.com/in/shafiq-ninaba">LinkedIn</a> for login password)
-    <br>
     <a href="https://github.com/shafiqninaba/ask-the-docs/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     &middot;
     <a href="https://github.com/shafiqninaba/ask-the-docs/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
@@ -71,8 +69,6 @@
 This is a personal project to demonstrate the use of an agentic Retrieval-Augmented Generation (RAG) workflow for a chatbot that helps users find more information about the websites that the user has sent for crawling. The chatbot is built using `LangGraph`, `OpenAI`'s `GPT-4o-mini` for the chat model, `Qdrant` (self-hosted) for the vector store and `Firecrawl` (self-hosted) for the web crawling service.
 
 The use case for this project is to provide a chatbot that can answer questions about the documentation of a website. Most of the time, documentation can get really convoluted and is hard to navigate. This app aims to provide a solution to this problem by allowing users to crawl the documentation of a website and then ask questions about it. The chatbot will then use the crawled data to answer the questions via an agentic RAG pipeline.
-
-The app is hosted on `Azure` and can be accessed [here](https://askthedocs-frontend.proudsea-4857eb40.canadacentral.azurecontainerapps.io/). The app is password-protected, so please message me on [LinkedIn](https://linkedin.com/in/shafiq-ninaba) for the password.
 
 ### Description
 
